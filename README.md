@@ -9,7 +9,6 @@ install it on your unix system using :
 ```
 g++ install.cpp -o install && ./install
 ```
-
 to open:
 ```
 taskit
