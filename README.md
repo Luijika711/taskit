@@ -13,3 +13,6 @@ to open:
 ```
 taskit
 ```
+
+![video](https://github.com/Luijika711/taskit/blob/main/video.gif?raw=true)
+
