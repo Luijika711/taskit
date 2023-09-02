@@ -67,13 +67,6 @@ public:
         }
         fin.close();
     }
-    void add_task(std::string task)
-    {
-        tasks.push_back(task);
-        fout.open("tasks.txt");
-        fout << task << '\n';
-        fout.close();
-    }
     void render_screen()
     {
         system("clear");
@@ -89,7 +82,7 @@ public:
             else
                 console.print(str, {console.green});
         }
-        printf(hide);
+        printf("%s", hide);
         for (int i = tasks.size() + 1; i <= w.ws_row - 3; ++i)
         {
             if (i == w.ws_row - 3)
@@ -98,11 +91,11 @@ public:
             else
                 std::cout << "\n";
         }
-        std::cout << "press w/s to go up/down | press enter to edit selected task | press backspace to delete selected task";
+        std::cout << "press w/s to go up/down | press enter to edit selected task | press backspace to delete selected task | press + to add new task | press esc to exit";
     }
     void edit_mode_render(std::string &str)
     {
-        system("clear");
+        system("clear && tput cnorm");
         std::cout << str;
         while (char ch = in::getch())
         {
@@ -150,7 +143,29 @@ public:
             {
                 edit_mode_render(tasks[selected_index - 1]);
             }
-
+            if (selected_index != 0 && ch == BACKSPACE_KEY)
+            {
+                std::string deletestr = tasks[selected_index - 1];
+                fout.open("tasks.txt", std::ofstream::out | std::ofstream::trunc);
+                fout.close();
+                fout.open("tasks.txt");
+                tasks.erase(tasks.begin() + selected_index - 1);
+                for (const auto &row : tasks)
+                {
+                    fout << row << '\n';
+                }
+                fout.close();
+            }
+            if (ch == '+')
+            {
+                tasks.push_back("");
+                edit_mode_render(tasks.back());
+            }
+            if (ch == 27)
+            {
+                system("tput cnorm && clear");
+                exit(0);
+            }
             render_screen();
         }
     }
