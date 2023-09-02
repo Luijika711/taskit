@@ -104,7 +104,7 @@ public:
     // output red bold 'Hello World!' on console output.
     void print(std::string s, std::vector<std::string> color_codes)
     {
-        std::cout << this->get(s, color_codes) << std::endl;
+        std::cout << this->get(s, color_codes);
     }
 
     // Presets

@@ -5,6 +5,8 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#define ENTER_KEY 10
+#define BACKSPACE_KEY 127
 namespace in
 {
     static struct termios old, current;
@@ -52,6 +54,7 @@ private:
     std::ofstream fout;
     const char *hide = "\e[?25l";
     struct winsize w;
+    int selected_index = 0;
 
 public:
     void start()
@@ -74,21 +77,58 @@ public:
     void render_screen()
     {
         system("clear");
-        std::cout << "tasks : \n";
+        if (selected_index == 0)
+            console.print("tasks:\n", {console.bg_dark_gray});
+        else
+            std::cout << "tasks:\n";
         for (int i = 0; i < tasks.size(); ++i)
         {
-            std::cout << i + 1 << "." + tasks[i] << '\n';
+            std::string str = std::to_string(i + 1) + "." + tasks[i] + "\n";
+            if (selected_index == i + 1)
+                console.print(str, {console.green, console.bg_dark_gray});
+            else
+                console.print(str, {console.green});
         }
         printf(hide);
         for (int i = tasks.size() + 1; i <= w.ws_row - 3; ++i)
         {
             if (i == w.ws_row - 3)
                 for (int j = 0; j < w.ws_col; ++j)
-                    std::cout << '-';
+                    console.print(" ", {console.bg_dark_gray});
             else
                 std::cout << "\n";
         }
-        std::cout << "asdf";
+        std::cout << "press w/s to go up/down | press enter to edit selected task | press backspace to delete selected task";
+    }
+    void edit_mode_render(std::string &str)
+    {
+        system("clear");
+        std::cout << str;
+        while (char ch = in::getch())
+        {
+
+            if (ch == BACKSPACE_KEY && str.size())
+            {
+                str.pop_back();
+                system("clear");
+                std::cout << str;
+                continue;
+            }
+
+            if (ch == ENTER_KEY)
+            {
+                fout.open("tasks.txt", std::ofstream::out | std::ofstream::trunc);
+                fout.close();
+                fout.open("tasks.txt");
+                for (auto &it : tasks)
+                    fout << it << '\n';
+                fout.close();
+                return;
+            }
+            str.push_back(ch);
+            system("clear");
+            std::cout << str;
+        }
     }
     app()
     {
@@ -97,6 +137,20 @@ public:
         render_screen();
         while (char ch = in::getch())
         {
+            std::cout << (int)ch << '\n';
+            if (ch == 's' && selected_index <= tasks.size() - 1)
+            {
+                selected_index++;
+            }
+            if (ch == 'w' && selected_index > 0)
+            {
+                selected_index--;
+            }
+            if (ch == ENTER_KEY && selected_index != 0)
+            {
+                edit_mode_render(tasks[selected_index - 1]);
+            }
+
             render_screen();
         }
     }
