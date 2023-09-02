@@ -13,8 +13,3 @@ to open:
 ```
 taskit
 ```
-
-to add new task:
-```
-taskit add "your task here"
-```
